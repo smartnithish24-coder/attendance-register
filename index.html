@@ -1,1032 +1,204 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Staff Attendance Register</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --paper:#FFF9EC;
-    --paper-line:#E7D9B8;
-    --ledger-green:#3A2E7C;
-    --ledger-green-light:#5842B8;
-    --ink:#241C40;
-    --ink-soft:#6A6089;
-    --present:#0E8E6D;
-    --present-bg:#CDF3E4;
-    --absent:#D8334A;
-    --absent-bg:#FBD9DE;
-    --weekend-bg:#FFD9E8;
-    --weekend-text:#C22368;
-    --festival-bg:#FFF3B0;
-    --festival-text:#8A6B00;
-    --gold:#FF9F3E;
-    --border:#EADCB8;
-    background:var(--paper);
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --paper:#191330;
-      --paper-line:#372B5E;
-      --ledger-green:#241948;
-      --ledger-green-light:#40308A;
-      --ink:#F1ECFF;
-      --ink-soft:#B5AAD9;
-      --present:#4FE2B4;
-      --present-bg:#123B31;
-      --absent:#FF8CA0;
-      --absent-bg:#4A1B26;
-      --weekend-bg:#4A1B36;
-      --weekend-text:#FF8CC6;
-      --festival-bg:#4A3A12;
-      --festival-text:#FFD873;
-      --gold:#FFB35C;
-      --border:#372B5E;
-    }
-  }
-  :root[data-theme="dark"]{
-    --paper:#191330; --paper-line:#372B5E; --ledger-green:#241948; --ledger-green-light:#40308A;
-    --ink:#F1ECFF; --ink-soft:#B5AAD9; --present:#4FE2B4; --present-bg:#123B31;
-    --absent:#FF8CA0; --absent-bg:#4A1B26; --weekend-bg:#4A1B36; --weekend-text:#FF8CC6;
-    --festival-bg:#4A3A12; --festival-text:#FFD873; --gold:#FFB35C; --border:#372B5E;
-  }
-  *{box-sizing:border-box;}
-  html,body{height:100%;}
-  body{
-    margin:0;
-    background:
-      radial-gradient(circle at 12% -10%, rgba(255,159,62,.28), transparent 45%),
-      radial-gradient(circle at 100% 0%, rgba(88,66,184,.22), transparent 40%),
-      var(--paper);
-    color:var(--ink);
-    font-family:'IBM Plex Sans', sans-serif;
-    padding-top:env(safe-area-inset-top,0px);
-    padding-bottom:env(safe-area-inset-bottom,0px);
-  }
-  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px;}
-
-  header.title-block{
-    background:linear-gradient(120deg, #3A2E7C 0%, #6A3FBF 55%, #FF9F3E 130%);
-    color:#FFF9EC;
-    border-radius:10px;
-    padding:26px 28px;
-    margin-bottom:22px;
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    flex-wrap:wrap;
-    gap:16px;
-    box-shadow: 0 8px 24px rgba(58,46,124,.28);
-  }
-  header.title-block h1{
-    font-family:'Source Serif 4', serif;
-    font-weight:700;
-    font-size:28px;
-    margin:0 0 4px;
-    letter-spacing:.2px;
-  }
-  header.title-block p{
-    margin:0;
-    color:#C7D2C4;
-    font-size:13.5px;
-  }
-  .month-controls{display:flex;align-items:center;gap:10px;}
-  .month-controls select{
-    background:var(--ledger-green-light);
-    color:#F2ECD8;
-    border:1px solid #4A6656;
-    border-radius:3px;
-    padding:7px 10px;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:14px;
-  }
-  .month-controls button{
-    background:transparent;
-    border:1px solid #4A6656;
-    color:#F2ECD8;
-    border-radius:3px;
-    width:32px;height:32px;
-    cursor:pointer;
-    font-size:15px;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .month-controls button:hover{background:var(--ledger-green-light);}
-
-  .panels{
-    display:grid;
-    grid-template-columns: 300px 1fr;
-    gap:18px;
-    align-items:start;
-  }
-  @media (max-width:820px){
-    .panels{grid-template-columns:1fr;}
-  }
-
-  .card{
-    background:rgba(255,255,255,.5);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:18px 18px 20px;
-    box-shadow: 0 4px 18px rgba(58,46,124,.06);
-  }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .card{ background:rgba(255,255,255,.03); } }
-  :root[data-theme="dark"] .card{ background:rgba(255,255,255,.03); }
-  .card h2{
-    font-family:'Source Serif 4', serif;
-    font-size:16px;
-    font-weight:600;
-    margin:0 0 12px;
-    padding-bottom:8px;
-    border-bottom:1px solid var(--border);
-  }
-
-  .row-form{display:flex;gap:8px;margin-bottom:12px;}
-  input[type="text"], input[type="date"]{
-    flex:1;
-    padding:8px 9px;
-    border:1px solid var(--border);
-    border-radius:3px;
-    background:rgba(255,255,255,.35);
-    color:var(--ink);
-    font-family:'IBM Plex Sans', sans-serif;
-    font-size:13.5px;
-  }
-  :root[data-theme="dark"] input, @media (prefers-color-scheme:dark){ input{background:rgba(255,255,255,.04);} }
-  button.add-btn{
-    background:linear-gradient(120deg, #6A3FBF, #3A2E7C);
-    color:#FFF9EC;
-    border:none;
-    border-radius:20px;
-    padding:9px 18px;
-    cursor:pointer;
-    font-size:13px;
-    font-weight:600;
-    box-shadow:0 3px 10px rgba(58,46,124,.25);
-    transition:transform .1s, box-shadow .15s;
-  }
-  button.add-btn:hover{transform:translateY(-1px); box-shadow:0 5px 14px rgba(58,46,124,.32);}
-  button.add-btn:active{transform:translateY(0);}
-
-  ul.plain{list-style:none;margin:0;padding:0;}
-  ul.plain li{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:7px 2px;
-    border-bottom:1px dashed var(--paper-line);
-    font-size:13.5px;
-    cursor:pointer;
-    user-select:none;
-  }
-  ul.plain li:last-child{border-bottom:none;}
-  ul.plain li .who-name{
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;
-  }
-  .del{
-    background:none;border:none;color:var(--absent);
-    cursor:pointer;font-size:13px;opacity:.75;
-  }
-  .del:hover{opacity:1;}
-  .reveal-del{
-    background:var(--absent);
-    color:#fff;
-    border:none;
-    border-radius:14px;
-    padding:4px 12px;
-    font-size:11.5px;
-    font-weight:600;
-    cursor:pointer;
-    flex-shrink:0;
-    margin-left:8px;
-  }
-  .reveal-hint{
-    flex-shrink:0;
-    color:var(--ink-soft);
-    font-size:15px;
-    opacity:.5;
-  }
-  .festival-name{color:var(--festival-text);font-weight:500;}
-  .muted{color:var(--ink-soft);font-size:12px;}
-
-  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 4px;font-size:12.5px;color:var(--ink-soft);}
-  .legend span{display:inline-flex;align-items:center;gap:6px;}
-  .swatch{width:12px;height:12px;border-radius:2px;display:inline-block;}
-
-  .table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:4px;}
-  table.register{
-    border-collapse:collapse;
-    width:100%;
-    min-width:760px;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12.5px;
-  }
-  table.register th, table.register td{
-    border:1px solid var(--paper-line);
-    text-align:center;
-    padding:0;
-  }
-  table.register thead th{
-    background:var(--ledger-green);
-    color:#EDE7D2;
-    font-family:'IBM Plex Sans', sans-serif;
-    font-weight:500;
-    padding:8px 4px;
-    position:sticky;
-    top:0;
-  }
-  table.register thead th.staff-col{
-    text-align:left;
-    padding-left:12px;
-    min-width:150px;
-    position:sticky;
-    left:0;
-    z-index:3;
-  }
-  table.register thead tr.daynum th{
-    background:var(--paper);
-    color:var(--ink);
-    font-weight:600;
-    padding:4px 0;
-    font-size:12px;
-  }
-  table.register thead tr.dayname th{
-    background:var(--paper);
-    color:var(--ink-soft);
-    font-weight:400;
-    padding:2px 0 6px;
-    font-size:10.5px;
-  }
-  table.register thead th.weekend{background:var(--weekend-bg);color:var(--weekend-text);}
-  table.register thead th.festival{background:var(--festival-bg);color:var(--festival-text);}
-
-  .fest-badge{
-    display:inline-block;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:9.5px;
-    font-weight:600;
-    letter-spacing:.03em;
-    padding:1px 6px;
-    border-radius:8px;
-    background:var(--festival-bg);
-    color:var(--festival-text);
-    margin-right:6px;
-    vertical-align:middle;
-  }
-
-  td.staff-name{
-    text-align:left;
-    padding:8px 10px;
-    font-family:'IBM Plex Sans', sans-serif;
-    font-weight:500;
-    background:var(--paper);
-    position:sticky;
-    left:0;
-    white-space:nowrap;
-  }
-  td.day-cell{
-    width:30px;height:34px;
-    cursor:pointer;
-    user-select:none;
-    font-weight:600;
-  }
-  td.day-cell.weekend{background:var(--weekend-bg);}
-  td.day-cell.festival{background:var(--festival-bg);}
-  td.day-cell.present{background:var(--present-bg);color:var(--present);}
-  td.day-cell.absent{background:var(--absent-bg);color:var(--absent);}
-  td.day-cell:hover{outline:1.5px solid var(--gold); outline-offset:-1.5px;}
-
-  td.summary{
-    font-family:'IBM Plex Sans', sans-serif;
-    font-weight:600;
-    font-size:12px;
-    padding:0 8px;
-    white-space:nowrap;
-  }
-  td.summary.p{color:var(--present);}
-  td.summary.a{color:var(--absent);}
-
-  .daily-row{
-    border-radius:10px;
-    border:1.5px solid var(--border);
-    background:rgba(255,255,255,.4);
-    margin-bottom:7px;
-    overflow:hidden;
-    transition:background .15s, border-color .15s;
-  }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .daily-row{ background:rgba(255,255,255,.03); } }
-  :root[data-theme="dark"] .daily-row{ background:rgba(255,255,255,.03); }
-  .daily-row.is-present{border-color:var(--present);}
-  .daily-row.is-absent{border-color:var(--absent);}
-  .daily-row-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:11px 14px;
-    font-size:14px;
-    font-weight:500;
-    gap:10px;
-    cursor:pointer;
-    user-select:none;
-    transition:transform .1s;
-  }
-  .daily-row-top:hover{background:rgba(255,159,62,.08);}
-  .daily-row.is-present .daily-row-top{background:var(--present-bg);color:var(--present);}
-  .daily-row.is-absent .daily-row-top{background:var(--absent-bg);color:var(--absent);}
-  .daily-row .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .status-pill{
-    flex-shrink:0;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    font-weight:600;
-    letter-spacing:.03em;
-    padding:4px 10px;
-    border-radius:20px;
-    background:rgba(255,255,255,.55);
-    color:var(--ink-soft);
-  }
-  .daily-row.is-present .status-pill{background:var(--present);color:#fff;}
-  .daily-row.is-absent .status-pill{background:var(--absent);color:#fff;}
-
-  .time-row{
-    display:flex;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:8px;
-    padding:9px 14px 12px;
-    background:rgba(255,255,255,.55);
-    border-top:1px dashed var(--present);
-  }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .time-row{ background:rgba(255,255,255,.02); } }
-  :root[data-theme="dark"] .time-row{ background:rgba(255,255,255,.02); }
-  .time-row label{
-    font-size:10.5px;
-    color:var(--ink-soft);
-    font-weight:600;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    margin-right:4px;
-  }
-  .time-row input[type="time"]{
-    padding:5px 7px;
-    border-radius:6px;
-    border:1px solid var(--border);
-    background:rgba(255,255,255,.7);
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12.5px;
-    color:var(--ink);
-  }
-  .time-row .hours-note{
-    margin-left:auto;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
-    font-weight:600;
-    color:var(--present);
-    white-space:nowrap;
-  }
-
-  .empty-note{
-    padding:26px 10px;
-    text-align:center;
-    color:var(--ink-soft);
-    font-size:13.5px;
-  }
-  footer.hint{
-    margin-top:16px;
-    font-size:12px;
-    color:var(--ink-soft);
-    text-align:center;
-  }
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1c2430;--mute:#6b7685;--line:#dfe3e9;--P:#1f8a4c;--Pb:#e0f3e8;--A:#c73a3a;--Ab:#fbe4e4;--H:#b7791f;--Hb:#fdf0d5;--off:#eceef2;--fest:#e7e3fa;--acc:#2b5fd9}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#12161c;--card:#1a2029;--ink:#e8ecf2;--mute:#94a0b0;--line:#2c3542;--P:#5fd394;--Pb:#17352a;--A:#ff8080;--Ab:#3b1d1f;--H:#f0b955;--Hb:#3a2f14;--off:#232a35;--fest:#2a2647;--acc:#7da2ff}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+h1{font-size:1.4rem;margin:0 0 2px}h2{font-size:1.05rem;margin:0 0 10px}
+p.sub{color:var(--mute);margin:0 0 14px}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,td.c:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.bar strong{min-width:9ch;text-align:center}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;font-size:.8rem}
+th,td{border:1px solid var(--line);text-align:center;padding:0;min-width:30px;height:32px}
+th{background:var(--off);font-weight:600}
+th small{display:block;font-weight:400;color:var(--mute)}
+td.n,th.n{position:sticky;left:0;background:var(--card);min-width:110px;text-align:left;padding:0 8px;z-index:1;font-size:.85rem}
+th.n{background:var(--off)}
+td.c{cursor:pointer;font-weight:600}
+td.we{background:var(--off);color:var(--mute)}td.fe{background:var(--fest);color:var(--mute)}
+td.P{background:var(--Pb);color:var(--P)}td.A{background:var(--Ab);color:var(--A)}td.H{background:var(--Hb);color:var(--H)}
+td.has-r{box-shadow:inset -6px 6px 0 -3px currentColor}
+td.t{min-width:34px;font-weight:600;padding:0 4px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--mute);font-size:.82rem;margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-2px;border:1px solid var(--line)}
+.row{display:grid;grid-template-columns:110px 130px 1fr;gap:8px;align-items:center;margin-bottom:8px}
+@media(max-width:560px){.row{grid-template-columns:1fr 1fr}.row input{grid-column:1/-1}}
+ul.log{list-style:none;padding:0;margin:0}
+ul.log li{padding:6px 0;border-bottom:1px solid var(--line)}
+ul.log li:last-child{border:0}
+.tag{display:inline-block;border-radius:6px;padding:0 7px;font-size:.78rem;font-weight:600;margin:0 4px}
+.tag.A{background:var(--Ab);color:var(--A)}.tag.H{background:var(--Hb);color:var(--H)}
+.mute{color:var(--mute)}
+dialog{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;width:min(380px,92vw)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+.seg button[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:#fff}
+textarea{width:100%;min-height:80px;resize:vertical}
+.acts{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+#saved{color:var(--P);margin-left:8px;opacity:0;transition:opacity .2s}#saved.on{opacity:1}
 </style>
 </head>
 <body>
-<div class="wrap">
+<h1>Staff Attendance Register</h1>
+<p class="sub">Tap a day cell to mark Present, Absent or Half day, and add a leave reason. Weekends and festivals are pre-marked.</p>
 
-  <header class="title-block">
-    <div>
-      <h1>Staff Attendance Register</h1>
-      <p>Tap a day cell to mark Present / Absent. Weekends and festivals are pre-marked.</p>
-    </div>
-    <div class="month-controls">
-      <button id="prevMonth" title="Previous month">&#8592;</button>
-      <select id="monthSelect"></select>
-      <select id="yearSelect"></select>
-      <button id="nextMonth" title="Next month">&#8594;</button>
-    </div>
-  </header>
-
-  <div class="panels">
-    <div style="display:flex;flex-direction:column;gap:18px;">
-      <div class="card">
-        <h2>Staff</h2>
-        <div class="row-form">
-          <input type="text" id="staffInput" placeholder="Staff name">
-          <button class="add-btn" id="addStaffBtn">Add</button>
-        </div>
-        <ul class="plain" id="staffList"></ul>
-      </div>
-
-    </div>
-
-    <div>
-
-      <div class="card" style="margin-bottom:18px;">
-        <h2>Mark today&#8217;s attendance</h2>
-        <div class="row-form" style="max-width:220px;">
-          <input type="date" id="dailyDateInput">
-        </div>
-        <div id="dailyFestivalNote" class="muted" style="margin:-4px 0 10px;"></div>
-        <div id="dailyEntryList"></div>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:14px;">
-          <button class="add-btn" id="saveDailyBtn">Save day</button>
-          <span class="muted" id="dailySavedNote" style="opacity:0;transition:opacity .3s;">Saved &#10003;</span>
-        </div>
-      </div>
-
-      <div class="legend">
-        <span><span class="swatch" style="background:var(--weekend-bg);border:1px solid var(--weekend-text);"></span>Weekend</span>
-        <span><span class="swatch" style="background:var(--festival-bg);border:1px solid var(--festival-text);"></span>Indian festival</span>
-        <span><span class="swatch" style="background:var(--present-bg);border:1px solid var(--present);"></span>Present</span>
-        <span><span class="swatch" style="background:var(--absent-bg);border:1px solid var(--absent);"></span>Absent</span>
-      </div>
-      <div class="table-scroll">
-        <table class="register" id="registerTable"></table>
-      </div>
-      <footer class="hint">Click once = Present &middot; click twice = Absent &middot; click again = clear. Saved in this browser only.</footer>
-    </div>
+<section>
+  <div class="bar">
+    <button id="prev" aria-label="Previous month">←</button>
+    <strong id="mlabel"></strong>
+    <button id="next" aria-label="Next month">→</button>
   </div>
+  <div class="wrap"><table id="grid"></table></div>
+  <div class="legend">
+    <span><i style="background:var(--off)"></i>Weekend</span>
+    <span><i style="background:var(--fest)"></i>Indian festival</span>
+    <span><i style="background:var(--Pb)"></i>Present</span>
+    <span><i style="background:var(--Ab)"></i>Absent</span>
+    <span><i style="background:var(--Hb)"></i>Half day (counts ½ leave)</span>
+    <span>Corner mark = reason added</span>
+  </div>
+</section>
 
-</div>
+<section>
+  <h2>Leave log this month</h2>
+  <ul class="log" id="log"></ul>
+</section>
+
+<section>
+  <h2>Staff</h2>
+  <div class="bar"><input id="newname" placeholder="Staff name" maxlength="40"><button id="add">Add</button></div>
+  <div id="stafflist" class="mute"></div>
+</section>
+
+<section>
+  <h2>Mark today's attendance</h2>
+  <div id="today"></div>
+  <div class="bar"><button class="pri" id="saveday">Save day</button><span id="saved">Saved ✓</span></div>
+</section>
+
+<p class="mute">Saved in this browser only.</p>
+
+<dialog id="dlg">
+  <h2 id="dtitle"></h2>
+  <div class="seg" id="seg">
+    <button data-s="P">Present</button><button data-s="A">Absent</button><button data-s="H">Half day</button><button data-s="">Clear</button>
+  </div>
+  <label id="rlabel" for="reason">Leave reason</label>
+  <textarea id="reason" maxlength="300" placeholder="e.g. Fever, family function, bank work"></textarea>
+  <div class="acts"><button id="dcancel">Cancel</button><button class="pri" id="dsave">Save</button></div>
+</dialog>
 
 <script>
-(function(){
-  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const DAY_INITIALS = ["S","M","T","W","T","F","S"];
+// Fixed-date festivals (MM-DD). Add lunar-calendar festivals for the year below.
+const FIXED={"01-14":"Pongal","01-26":"Republic Day","05-01":"May Day","08-15":"Independence Day","10-02":"Gandhi Jayanti","12-25":"Christmas"};
+const EXTRA={ /* "2026-11-08":"Diwali" */ };
+const KEY="attendance-register-v2";
+const $=id=>document.getElementById(id);
+const S={staff:[],att:{}};
+try{const d=JSON.parse(localStorage.getItem(KEY)||"null");if(d){S.staff=d.staff||[];S.att=d.att||{}}}catch(e){}
+if(!S.staff.length)S.staff=[{id:"s1",name:"Staff 1"}];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const iso=(y,m,d)=>`${y}-${pad(m+1)}-${pad(d)}`;
+const LBL={P:"Present",A:"Absent",H:"Half day"};
+const SYM={P:"P",A:"A",H:"½"};
+let cur=new Date();cur=new Date(cur.getFullYear(),cur.getMonth(),1);
+let target=null,pick="";
 
-  const today = new Date();
-  let viewYear = today.getFullYear();
-  let viewMonth = today.getMonth(); // 0-indexed
+const festival=(y,m,d)=>EXTRA[iso(y,m,d)]||FIXED[`${pad(m+1)}-${pad(d)}`]||"";
+const get=(date,id)=>(S.att[date]||{})[id];
+function set(date,id,s,r){
+  if(!s){if(S.att[date]){delete S.att[date][id];if(!Object.keys(S.att[date]).length)delete S.att[date]}return}
+  (S.att[date]=S.att[date]||{})[id]={s,r:s==="P"?"":(r||"").trim()};
+}
 
-  const STORAGE_KEYS = {
-    staff: 'attreg_staff',
-    attendance: 'attreg_attendance'
-  };
-
-  // Widely observed Indian festivals/gazetted holidays (2025-2027). Tithi/moon-based
-  // dates for 2026-27 are best-available estimates and may shift by a day per state notification.
-  const INDIAN_FESTIVALS = [
-    // 2025
-    {date:'2025-01-14', name:'Makar Sankranti / Pongal'},
-    {date:'2025-01-26', name:'Republic Day'},
-    {date:'2025-02-26', name:'Maha Shivaratri'},
-    {date:'2025-03-14', name:'Holi'},
-    {date:'2025-03-31', name:'Eid-ul-Fitr'},
-    {date:'2025-04-06', name:'Ram Navami'},
-    {date:'2025-04-10', name:'Mahavir Jayanti'},
-    {date:'2025-04-18', name:'Good Friday'},
-    {date:'2025-05-12', name:'Buddha Purnima'},
-    {date:'2025-06-07', name:'Eid-ul-Adha / Bakrid'},
-    {date:'2025-07-06', name:'Muharram'},
-    {date:'2025-08-09', name:'Raksha Bandhan'},
-    {date:'2025-08-15', name:'Independence Day'},
-    {date:'2025-08-16', name:'Janmashtami'},
-    {date:'2025-08-27', name:'Ganesh Chaturthi'},
-    {date:'2025-09-05', name:'Id-e-Milad'},
-    {date:'2025-10-02', name:'Gandhi Jayanti / Dussehra'},
-    {date:'2025-10-20', name:'Diwali'},
-    {date:'2025-11-05', name:'Guru Nanak Jayanti'},
-    {date:'2025-12-25', name:'Christmas'},
-    // 2026
-    {date:'2026-01-14', name:'Makar Sankranti / Pongal'},
-    {date:'2026-01-26', name:'Republic Day'},
-    {date:'2026-03-03', name:'Holika Dahan'},
-    {date:'2026-03-04', name:'Holi'},
-    {date:'2026-03-21', name:'Eid-ul-Fitr'},
-    {date:'2026-03-26', name:'Ram Navami'},
-    {date:'2026-03-31', name:'Mahavir Jayanti'},
-    {date:'2026-04-03', name:'Good Friday'},
-    {date:'2026-04-14', name:'Dr Ambedkar Jayanti'},
-    {date:'2026-05-01', name:'Buddha Purnima'},
-    {date:'2026-05-27', name:'Bakrid / Eid al-Adha'},
-    {date:'2026-06-26', name:'Muharram'},
-    {date:'2026-08-15', name:'Independence Day'},
-    {date:'2026-08-25', name:'Eid-e-Milad'},
-    {date:'2026-08-28', name:'Raksha Bandhan'},
-    {date:'2026-09-04', name:'Janmashtami'},
-    {date:'2026-09-15', name:'Ganesh Chaturthi'},
-    {date:'2026-10-02', name:'Gandhi Jayanti'},
-    {date:'2026-10-20', name:'Dussehra'},
-    {date:'2026-11-06', name:'Dhanteras'},
-    {date:'2026-11-08', name:'Diwali / Lakshmi Puja'},
-    {date:'2026-11-09', name:'Govardhan Puja'},
-    {date:'2026-11-10', name:'Bhai Dooj'},
-    {date:'2026-11-24', name:'Guru Nanak Jayanti'},
-    {date:'2026-12-25', name:'Christmas'},
-    // 2027
-    {date:'2027-01-26', name:'Republic Day'},
-    {date:'2027-03-06', name:'Maha Shivaratri'},
-    {date:'2027-03-10', name:'Eid-ul-Fitr'},
-    {date:'2027-03-22', name:'Holi'},
-    {date:'2027-03-26', name:'Good Friday'},
-    {date:'2027-04-15', name:'Ram Navami'},
-    {date:'2027-05-17', name:'Bakrid / Eid al-Adha'},
-    {date:'2027-06-16', name:'Muharram'},
-    {date:'2027-08-15', name:'Independence Day'},
-    {date:'2027-08-25', name:'Janmashtami'},
-    {date:'2027-10-02', name:'Gandhi Jayanti'},
-    {date:'2027-10-09', name:'Dussehra'},
-    {date:'2027-10-29', name:'Diwali'},
-    {date:'2027-12-25', name:'Christmas'},
-    // 2028
-    {date:'2028-01-26', name:'Republic Day'},
-    {date:'2028-02-23', name:'Maha Shivaratri'},
-    {date:'2028-02-27', name:'Eid-ul-Fitr'},
-    {date:'2028-03-11', name:'Holi'},
-    {date:'2028-04-03', name:'Ram Navami'},
-    {date:'2028-04-14', name:'Good Friday'},
-    {date:'2028-05-06', name:'Bakrid / Eid al-Adha'},
-    {date:'2028-06-04', name:'Muharram'},
-    {date:'2028-08-13', name:'Janmashtami'},
-    {date:'2028-08-15', name:'Independence Day'},
-    {date:'2028-09-27', name:'Dussehra'},
-    {date:'2028-10-02', name:'Gandhi Jayanti'},
-    {date:'2028-10-17', name:'Diwali'},
-    {date:'2028-12-25', name:'Christmas'}
-  ];
-
-  function safeLoad(key, fallback){
-    try{
-      const raw = localStorage.getItem(key);
-      if(!raw) return fallback;
-      return JSON.parse(raw);
-    }catch(e){ return fallback; }
-  }
-  function safeSave(key, val){
-    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){ /* ignore */ }
-  }
-
-  let staff = safeLoad(STORAGE_KEYS.staff, []); // [{id,name}]
-  let attendance = safeLoad(STORAGE_KEYS.attendance, {}); // { "staffId_YYYY-MM-DD": {status:'P'|'A', inTime, outTime} }
-
-  function uid(){ return 's' + Math.random().toString(36).slice(2,9); }
-
-  // ---------- Month/Year selectors ----------
-  const monthSelect = document.getElementById('monthSelect');
-  const yearSelect = document.getElementById('yearSelect');
-  MONTH_NAMES.forEach((m,i)=>{
-    const opt = document.createElement('option');
-    opt.value = i; opt.textContent = m;
-    monthSelect.appendChild(opt);
-  });
-  for(let y = today.getFullYear()-3; y <= today.getFullYear()+3; y++){
-    const opt = document.createElement('option');
-    opt.value = y; opt.textContent = y;
-    yearSelect.appendChild(opt);
-  }
-  monthSelect.value = viewMonth;
-  yearSelect.value = viewYear;
-
-  monthSelect.addEventListener('change', ()=>{ viewMonth = parseInt(monthSelect.value,10); render(); });
-  yearSelect.addEventListener('change', ()=>{ viewYear = parseInt(yearSelect.value,10); render(); });
-  document.getElementById('prevMonth').addEventListener('click', ()=>{
-    viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;}
-    monthSelect.value = viewMonth; yearSelect.value = viewYear; render();
-  });
-  document.getElementById('nextMonth').addEventListener('click', ()=>{
-    viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;}
-    monthSelect.value = viewMonth; yearSelect.value = viewYear; render();
-  });
-
-  // ---------- Staff management ----------
-  const staffInput = document.getElementById('staffInput');
-  const staffListEl = document.getElementById('staffList');
-  document.getElementById('addStaffBtn').addEventListener('click', addStaff);
-  staffInput.addEventListener('keydown', e=>{ if(e.key==='Enter') addStaff(); });
-
-  function addStaff(){
-    const name = staffInput.value.trim();
-    if(!name) return;
-    staff.push({id: uid(), name});
-    staffInput.value = '';
-    safeSave(STORAGE_KEYS.staff, staff);
-    renderStaffList();
-    renderTable();
-    if(typeof loadPendingForDate==='function'){ loadPendingForDate(); renderDailyEntry(); }
-  }
-  function removeStaff(id){
-    revealedStaffId = null;
-    staff = staff.filter(s=>s.id!==id);
-    Object.keys(attendance).forEach(k=>{ if(k.startsWith(id+'_')) delete attendance[k]; });
-    safeSave(STORAGE_KEYS.staff, staff);
-    safeSave(STORAGE_KEYS.attendance, attendance);
-    renderStaffList();
-    renderTable();
-    if(typeof loadPendingForDate==='function'){ loadPendingForDate(); renderDailyEntry(); }
-  }
-  let revealedStaffId = null; // which staff row currently shows its Remove button
-
-  function renderStaffList(){
-    staffListEl.innerHTML = '';
-    if(staff.length===0){
-      const li = document.createElement('li');
-      li.style.cursor = 'default';
-      li.innerHTML = '<span class="muted">No staff added yet.</span>';
-      staffListEl.appendChild(li);
-      return;
+function render(){
+  const y=cur.getFullYear(),m=cur.getMonth(),n=new Date(y,m+1,0).getDate();
+  $("mlabel").textContent=cur.toLocaleDateString("en-IN",{month:"long",year:"numeric"});
+  let h='<tr><th class="n">Staff</th>';
+  for(let d=1;d<=n;d++){const w=new Date(y,m,d).toLocaleDateString("en-IN",{weekday:"narrow"});h+=`<th>${d}<small>${w}</small></th>`}
+  h+='<th class="t">P</th><th class="t">A</th><th class="t">½</th></tr>';
+  const log=[];
+  for(const st of S.staff){
+    let p=0,a=0,hf=0;h+=`<tr><td class="n">${esc(st.name)}</td>`;
+    for(let d=1;d<=n;d++){
+      const date=iso(y,m,d),wd=new Date(y,m,d).getDay(),fest=festival(y,m,d),rec=get(date,st.id);
+      let cls="c",txt="",tip="";
+      if(rec){cls+=" "+rec.s;txt=SYM[rec.s];tip=LBL[rec.s]+(rec.r?": "+rec.r:"");if(rec.r)cls+=" has-r";
+        if(rec.s==="P")p++;else if(rec.s==="A"){a++;log.push([date,st.name,rec])}else{hf++;log.push([date,st.name,rec])}}
+      else if(fest){cls+=" fe";txt="F";tip=fest}
+      else if(wd===0||wd===6){cls+=" we";txt="·";tip="Weekend"}
+      h+=`<td class="${cls}" tabindex="0" role="button" data-d="${date}" data-i="${st.id}" title="${esc(tip)}" aria-label="${esc(st.name+" "+date+" "+(tip||"unmarked"))}">${txt}</td>`;
     }
-    staff.forEach(s=>{
-      const li = document.createElement('li');
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'who-name';
-      nameSpan.textContent = s.name;
-      li.appendChild(nameSpan);
-
-      if(revealedStaffId === s.id){
-        const delBtn = document.createElement('button');
-        delBtn.className = 'reveal-del';
-        delBtn.textContent = 'Remove';
-        delBtn.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          removeStaff(s.id);
-        });
-        li.appendChild(delBtn);
-      } else {
-        const hint = document.createElement('span');
-        hint.className = 'reveal-hint';
-        hint.textContent = '\u22EF'; // ⋯ subtle "more" hint on the right
-        li.appendChild(hint);
-      }
-
-      // Tap the name row to reveal/hide its Remove button; tapping another
-      // row's name switches the reveal to that row instead.
-      li.addEventListener('click', ()=>{
-        revealedStaffId = (revealedStaffId === s.id) ? null : s.id;
-        renderStaffList();
-      });
-
-      staffListEl.appendChild(li);
-    });
+    h+=`<td class="t">${p}</td><td class="t">${a}</td><td class="t">${hf}</td></tr>`;
   }
+  $("grid").innerHTML=h;
+  log.sort((x,y)=>x[0]<y[0]?-1:1);
+  $("log").innerHTML=log.length?log.map(([date,nm,r])=>{
+    const dt=new Date(date+"T00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+    return `<li><b>${dt}</b> ${esc(nm)}<span class="tag ${r.s}">${LBL[r.s]}</span>${r.r?esc(r.r):'<span class="mute">No reason given</span>'}</li>`}).join(""):'<li class="mute">No absences or half days this month.</li>';
+  $("stafflist").innerHTML=S.staff.map(s=>`<span style="margin-right:12px">${esc(s.name)} <button data-rm="${s.id}" aria-label="Remove ${esc(s.name)}" style="padding:0 6px">×</button></span>`).join("");
+  renderToday();
+}
 
-  // ---------- Table rendering ----------
-  const table = document.getElementById('registerTable');
+function renderToday(){
+  const t=new Date(),date=iso(t.getFullYear(),t.getMonth(),t.getDate());
+  $("today").innerHTML=S.staff.map(st=>{const r=get(date,st.id)||{s:"",r:""};
+    return `<div class="row" data-i="${st.id}"><span>${esc(st.name)}</span>
+    <select aria-label="Status for ${esc(st.name)}"><option value="">Not marked</option>${["P","A","H"].map(k=>`<option value="${k}"${r.s===k?" selected":""}>${LBL[k]}</option>`).join("")}</select>
+    <input placeholder="Leave reason" maxlength="300" value="${esc(r.r||"")}" ${r.s==="A"||r.s==="H"?"":"disabled"}></div>`}).join("");
+}
 
-  function pad(n){ return n<10 ? '0'+n : ''+n; }
+$("today").addEventListener("change",e=>{
+  if(e.target.tagName!=="SELECT")return;
+  const inp=e.target.parentElement.querySelector("input"),on=e.target.value==="A"||e.target.value==="H";
+  inp.disabled=!on;if(!on)inp.value="";else inp.focus();
+});
+$("saveday").onclick=()=>{
+  const t=new Date(),date=iso(t.getFullYear(),t.getMonth(),t.getDate());
+  document.querySelectorAll("#today .row").forEach(r=>set(date,r.dataset.i,r.querySelector("select").value,r.querySelector("input").value));
+  save();render();$("saved").classList.add("on");setTimeout(()=>$("saved").classList.remove("on"),1800);
+};
 
+function openDlg(date,id){
+  const st=S.staff.find(s=>s.id===id),rec=get(date,id);target={date,id};pick=rec?rec.s:"";
+  $("dtitle").textContent=`${st.name} · ${new Date(date+"T00:00").toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"})}`;
+  $("reason").value=rec?rec.r:"";syncDlg();$("dlg").showModal();
+}
+function syncDlg(){
+  document.querySelectorAll("#seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===pick));
+  const on=pick==="A"||pick==="H";$("reason").hidden=!on;$("rlabel").hidden=!on;
+}
+$("seg").onclick=e=>{const b=e.target.closest("button");if(!b)return;pick=b.dataset.s;syncDlg();if(pick==="A"||pick==="H")$("reason").focus()};
+$("dcancel").onclick=()=>$("dlg").close();
+$("dsave").onclick=()=>{set(target.date,target.id,pick,$("reason").value);save();$("dlg").close();render()};
+const cellOpen=e=>{const c=e.target.closest("td.c");if(c)openDlg(c.dataset.d,c.dataset.i)};
+$("grid").addEventListener("click",cellOpen);
+$("grid").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();cellOpen(e)}});
 
-  function isoDate(y,m,d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
-
-  function festivalFor(iso){
-    return INDIAN_FESTIVALS.find(f=>f.date===iso);
-  }
-
-  function renderTable(){
-    const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
-    table.innerHTML = '';
-
-    const thead = document.createElement('thead');
-
-    // day number row
-    const rowNum = document.createElement('tr');
-    rowNum.className = 'daynum';
-    const staffHeaderNum = document.createElement('th');
-    staffHeaderNum.className = 'staff-col';
-    staffHeaderNum.rowSpan = 2;
-    staffHeaderNum.textContent = `${MONTH_NAMES[viewMonth]} ${viewYear}`;
-    rowNum.appendChild(staffHeaderNum);
-
-    const rowName = document.createElement('tr');
-    rowName.className = 'dayname';
-
-    for(let d=1; d<=daysInMonth; d++){
-      const dateObj = new Date(viewYear, viewMonth, d);
-      const dow = dateObj.getDay(); // 0=Sun,6=Sat
-      const iso = isoDate(viewYear, viewMonth, d);
-      const isWeekend = (dow===0 || dow===6);
-      const fest = festivalFor(iso);
-
-      const thNum = document.createElement('th');
-      thNum.textContent = d;
-      if(isWeekend) thNum.classList.add('weekend');
-      if(fest) thNum.classList.add('festival');
-      rowNum.appendChild(thNum);
-
-      const thName = document.createElement('th');
-      thName.textContent = DAY_INITIALS[dow];
-      thName.title = fest ? fest.name : '';
-      if(isWeekend) thName.classList.add('weekend');
-      if(fest) thName.classList.add('festival');
-      rowName.appendChild(thName);
-    }
-
-    const thSummaryP = document.createElement('th');
-    thSummaryP.textContent = 'P';
-    thSummaryP.rowSpan = 2;
-    thSummaryP.style.minWidth = '34px';
-    const thSummaryA = document.createElement('th');
-    thSummaryA.textContent = 'A';
-    thSummaryA.rowSpan = 2;
-    thSummaryA.style.minWidth = '34px';
-    const thSummaryHrs = document.createElement('th');
-    thSummaryHrs.textContent = 'Hrs';
-    thSummaryHrs.rowSpan = 2;
-    thSummaryHrs.style.minWidth = '54px';
-    rowNum.appendChild(thSummaryP);
-    rowNum.appendChild(thSummaryA);
-    rowNum.appendChild(thSummaryHrs);
-
-    thead.appendChild(rowNum);
-    thead.appendChild(rowName);
-    table.appendChild(thead);
-
-    const tbody = document.createElement('tbody');
-
-    if(staff.length===0){
-      const tr = document.createElement('tr');
-      const td = document.createElement('td');
-      td.className = 'empty-note';
-      td.colSpan = daysInMonth + 4;
-      td.textContent = 'Add staff on the left to start marking attendance.';
-      tr.appendChild(td);
-      tbody.appendChild(tr);
-    } else {
-      staff.forEach(s=>{
-        const tr = document.createElement('tr');
-        const nameTd = document.createElement('td');
-        nameTd.className = 'staff-name';
-        nameTd.textContent = s.name;
-        tr.appendChild(nameTd);
-
-        let presentCount = 0, absentCount = 0, totalMinutes = 0;
-
-        for(let d=1; d<=daysInMonth; d++){
-          const dateObj = new Date(viewYear, viewMonth, d);
-          const dow = dateObj.getDay();
-          const iso = isoDate(viewYear, viewMonth, d);
-          const isWeekend = (dow===0 || dow===6);
-          const fest = festivalFor(iso);
-          const key = s.id + '_' + iso;
-          const rec = attendance[key];
-          const status = statusOf(rec); // 'P' | 'A' | undefined
-
-          const td = document.createElement('td');
-          td.className = 'day-cell';
-          if(isWeekend) td.classList.add('weekend');
-          if(fest) td.classList.add('festival');
-          let tip = fest ? fest.name : '';
-          if(status==='P'){
-            td.classList.add('present'); td.textContent='P'; presentCount++;
-            const {inTime, outTime} = timesOf(rec);
-            if(inTime && outTime){
-              const mins = computeWorkedMinutes(inTime, outTime);
-              tip = (tip ? tip+' — ' : '') + `${inTime}–${outTime} (${formatMinutes(mins)} after lunch)`;
-              if(mins!=null) totalMinutes += mins;
-            }
-          }
-          else if(status==='A'){ td.classList.add('absent'); td.textContent='A'; absentCount++; }
-          else { td.textContent=''; }
-
-          td.title = tip;
-          td.addEventListener('click', ()=> cycleStatus(key));
-          tr.appendChild(td);
-        }
-
-        const tdP = document.createElement('td');
-        tdP.className = 'summary p';
-        tdP.textContent = presentCount;
-        const tdA = document.createElement('td');
-        tdA.className = 'summary a';
-        tdA.textContent = absentCount;
-        const tdHrs = document.createElement('td');
-        tdHrs.className = 'summary';
-        tdHrs.textContent = formatMinutes(totalMinutes);
-        tr.appendChild(tdP);
-        tr.appendChild(tdA);
-        tr.appendChild(tdHrs);
-
-        tbody.appendChild(tr);
-      });
-    }
-
-    table.appendChild(tbody);
-  }
-
-  function timeToMinutes(t){
-    if(!t) return null;
-    const parts = t.split(':');
-    if(parts.length<2) return null;
-    const h = parseInt(parts[0],10), m = parseInt(parts[1],10);
-    if(isNaN(h)||isNaN(m)) return null;
-    return h*60+m;
-  }
-  function computeWorkedMinutes(inTime, outTime){
-    const inM = timeToMinutes(inTime), outM = timeToMinutes(outTime);
-    if(inM==null || outM==null) return null;
-    let diff = outM - inM;
-    if(diff < 0) diff += 24*60; // handles an overnight/late-night shift
-    diff -= 60; // 1 hour lunch break deducted
-    if(diff < 0) diff = 0;
-    return diff;
-  }
-  function formatMinutes(mins){
-    if(mins==null) return '';
-    const h = Math.floor(mins/60), m = mins%60;
-    return `${h}h ${m}m`;
-  }
-  // Attendance values may be a plain 'P'/'A' string (older data) or an object
-  // {status:'P'|'A', inTime:'HH:MM', outTime:'HH:MM'}. These two helpers normalize both.
-  function statusOf(v){
-    if(!v) return undefined;
-    return typeof v === 'string' ? v : v.status;
-  }
-  function timesOf(v){
-    if(!v || typeof v === 'string') return {inTime:'', outTime:''};
-    return {inTime: v.inTime || '', outTime: v.outTime || ''};
-  }
-
-  function cycleStatus(key){
-    const cur = attendance[key];
-    const curStatus = statusOf(cur);
-    const times = timesOf(cur);
-    if(!curStatus){ attendance[key] = {status:'P', inTime: times.inTime, outTime: times.outTime}; }
-    else if(curStatus==='P'){ attendance[key] = {status:'A', inTime: times.inTime, outTime: times.outTime}; }
-    else { delete attendance[key]; }
-    safeSave(STORAGE_KEYS.attendance, attendance);
-    renderTable();
-  }
-
-  // ---------- Daily entry card ----------
-  const dailyDateInput = document.getElementById('dailyDateInput');
-  const dailyEntryList = document.getElementById('dailyEntryList');
-  const dailyFestivalNote = document.getElementById('dailyFestivalNote');
-  const saveDailyBtn = document.getElementById('saveDailyBtn');
-  const dailySavedNote = document.getElementById('dailySavedNote');
-
-  let pendingDaily = {}; // staffId -> {status:'P'|'A', inTime, outTime} | undefined, for the currently selected date
-  const DEFAULT_IN = '09:00';
-  const DEFAULT_OUT = '18:00';
-
-  function todayIso(){
-    return isoDate(today.getFullYear(), today.getMonth(), today.getDate());
-  }
-  dailyDateInput.value = todayIso();
-
-  dailyDateInput.addEventListener('change', ()=>{
-    if(!dailyDateInput.value) dailyDateInput.value = todayIso();
-    loadPendingForDate();
-    renderDailyEntry();
-  });
-
-  function loadPendingForDate(){
-    const iso = dailyDateInput.value;
-    pendingDaily = {};
-    staff.forEach(s=>{
-      const rec = attendance[s.id + '_' + iso];
-      const status = statusOf(rec);
-      if(status){
-        const times = timesOf(rec);
-        pendingDaily[s.id] = {
-          status,
-          inTime: times.inTime || DEFAULT_IN,
-          outTime: times.outTime || DEFAULT_OUT
-        };
-      }
-    });
-  }
-
-  function renderDailyEntry(){
-    const iso = dailyDateInput.value;
-    dailyEntryList.innerHTML = '';
-
-    const fest = festivalFor(iso);
-    const d = new Date(iso + 'T00:00:00');
-    const isWeekend = (d.getDay()===0 || d.getDay()===6);
-    let note = '';
-    if(fest) note = `Festival: ${fest.name}`;
-    else if(isWeekend) note = 'Weekend';
-    dailyFestivalNote.textContent = note;
-
-    if(staff.length===0){
-      const p = document.createElement('p');
-      p.className = 'muted';
-      p.textContent = 'Add staff on the left first.';
-      dailyEntryList.appendChild(p);
-      return;
-    }
-
-    staff.forEach(s=>{
-      const entry = pendingDaily[s.id]; // {status,inTime,outTime} | undefined
-      const state = entry ? entry.status : undefined;
-
-      const row = document.createElement('div');
-      row.className = 'daily-row' + (state==='P' ? ' is-present' : state==='A' ? ' is-absent' : '');
-
-      const top = document.createElement('div');
-      top.className = 'daily-row-top';
-
-      const who = document.createElement('span');
-      who.className = 'who';
-      who.textContent = s.name;
-
-      const pill = document.createElement('span');
-      pill.className = 'status-pill';
-      pill.textContent = state==='P' ? 'PRESENT' : state==='A' ? 'ABSENT' : 'Tap to mark';
-
-      top.appendChild(who);
-      top.appendChild(pill);
-
-      // Tap the name row: unmarked -> Present -> Absent -> unmarked
-      top.addEventListener('click', ()=>{
-        if(!state) pendingDaily[s.id] = {status:'P', inTime: DEFAULT_IN, outTime: DEFAULT_OUT};
-        else if(state==='P') pendingDaily[s.id] = {status:'A', inTime: entry.inTime, outTime: entry.outTime};
-        else pendingDaily[s.id] = undefined;
-        renderDailyEntry();
-      });
-
-      row.appendChild(top);
-
-      if(state==='P'){
-        const timeRow = document.createElement('div');
-        timeRow.className = 'time-row';
-
-        const inLabel = document.createElement('label');
-        inLabel.textContent = 'In';
-        const inInput = document.createElement('input');
-        inInput.type = 'time';
-        inInput.value = entry.inTime || DEFAULT_IN;
-
-        const outLabel = document.createElement('label');
-        outLabel.textContent = 'Out';
-        const outInput = document.createElement('input');
-        outInput.type = 'time';
-        outInput.value = entry.outTime || DEFAULT_OUT;
-
-        const hoursNote = document.createElement('span');
-        hoursNote.className = 'hours-note';
-
-        function updateHoursNote(){
-          const mins = computeWorkedMinutes(inInput.value, outInput.value);
-          hoursNote.textContent = mins==null ? '' : `${formatMinutes(mins)} (1h lunch deducted)`;
-        }
-        updateHoursNote();
-
-        [inInput, outInput].forEach(el=>{
-          el.addEventListener('click', e=> e.stopPropagation());
-          el.addEventListener('change', ()=>{
-            entry.inTime = inInput.value;
-            entry.outTime = outInput.value;
-            updateHoursNote();
-          });
-        });
-
-        timeRow.appendChild(inLabel);
-        timeRow.appendChild(inInput);
-        timeRow.appendChild(outLabel);
-        timeRow.appendChild(outInput);
-        timeRow.appendChild(hoursNote);
-        row.appendChild(timeRow);
-      }
-
-      dailyEntryList.appendChild(row);
-    });
-  }
-
-  saveDailyBtn.addEventListener('click', ()=>{
-    const iso = dailyDateInput.value;
-    if(!iso) return;
-    staff.forEach(s=>{
-      const key = s.id + '_' + iso;
-      const entry = pendingDaily[s.id];
-      if(entry && entry.status){
-        attendance[key] = entry.status==='P'
-          ? {status:'P', inTime: entry.inTime || DEFAULT_IN, outTime: entry.outTime || DEFAULT_OUT}
-          : {status:'A'};
-      } else {
-        delete attendance[key];
-      }
-    });
-    safeSave(STORAGE_KEYS.attendance, attendance);
-
-    // jump the calendar view to the saved date's month so the change is visible
-    const d = new Date(iso + 'T00:00:00');
-    viewYear = d.getFullYear();
-    viewMonth = d.getMonth();
-    monthSelect.value = viewMonth;
-    yearSelect.value = viewYear;
-    renderTable();
-
-    dailySavedNote.style.opacity = '1';
-    setTimeout(()=>{ dailySavedNote.style.opacity = '0'; }, 1600);
-  });
-
-  function render(){
-    renderStaffList();
-    renderTable();
-    loadPendingForDate();
-    renderDailyEntry();
-  }
-
-  render();
-})();
+$("prev").onclick=()=>{cur=new Date(cur.getFullYear(),cur.getMonth()-1,1);render()};
+$("next").onclick=()=>{cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);render()};
+$("add").onclick=()=>{const v=$("newname").value.trim();if(!v)return;S.staff.push({id:"s"+Date.now(),name:v});$("newname").value="";save();render()};
+$("newname").addEventListener("keydown",e=>{if(e.key==="Enter")$("add").click()});
+$("stafflist").addEventListener("click",e=>{const id=e.target.dataset.rm;if(!id)return;
+  const s=S.staff.find(x=>x.id===id);if(!confirm(`Remove ${s.name} and all their attendance?`))return;
+  S.staff=S.staff.filter(x=>x.id!==id);for(const d in S.att){delete S.att[d][id];if(!Object.keys(S.att[d]).length)delete S.att[d]}
+  save();render()});
+render();
 </script>
 </body>
 </html>
